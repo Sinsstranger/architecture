@@ -1,23 +1,32 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Model\Repository;
 
+use Interfaces\StorageAdapterInterface;
 use Model\Entity;
 
-class User
+class User implements StorageAdapterInterface
 {
     /**
      * Получаем пользователя по идентификатору
      *
      * @param int $id
-     * @return Entity\User|null
      */
     public function getById(int $id): ?Entity\User
     {
         foreach ($this->getDataFromSource(['id' => $id]) as $user) {
             return $this->createUser($user);
+        }
+
+        return null;
+    }
+
+    public function find(int $id): ?array
+    {
+        foreach ($this->getDataFromSource(['id' => $id]) as $user) {
+            return $user;
         }
 
         return null;
@@ -108,7 +117,7 @@ class User
         }
 
         $productFilter = function (array $dataSource) use ($search): bool {
-            return (bool) array_intersect($dataSource, $search);
+            return !empty(array_intersect($dataSource, $search));
         };
 
         return array_filter($dataSource, $productFilter);
